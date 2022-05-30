@@ -1,6 +1,7 @@
-import tensorflow as tf
 
 import flwr as fl
+
+import tensorflow as tf
 
 if __name__ == "__main__":
     # Load and compile Keras model
@@ -27,3 +28,5 @@ if __name__ == "__main__":
 
     # Start Flower client
     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+
+
