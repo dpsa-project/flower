@@ -18,15 +18,19 @@
 from .app import ClientLike as ClientLike
 from .app import start_client as start_client
 from .app import start_numpy_client as start_numpy_client
+from .app import start_dpsa_numpy_client as start_dpsa_numpy_client
 from .app import to_client as to_client
 from .client import Client as Client
 from .numpy_client import NumPyClient as NumPyClient
+from .dpsa_numpy_client import DpsaNumPyClient as DpsaNumPyClient
 
 __all__ = [
     "Client",
     "ClientLike",
     "NumPyClient",
+    "DpsaNumPyClient",
     "start_client",
     "start_numpy_client",
+    "start_dpsa_numpy_client",
     "to_client",
 ]

@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    DpsaFitDone,
     Parameters,
     Reconnect,
     Scalar,
@@ -212,6 +213,7 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            bIsDpsa=True, # we want dpsa
         )
         log(
             DEBUG,
@@ -219,6 +221,10 @@ class Server:
             len(results),
             len(failures),
         )
+
+        # since we have dpsa, we need to get the actual results now from the aggregator
+        # but we cannot do that currently
+        raise Exception("Got the following result: \n" + str(results))
 
         # Aggregate training results
         aggregated_result: Tuple[
@@ -306,11 +312,17 @@ def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    bIsDpsa: bool,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
+    if bIsDpsa:
+        fitting_function = dpsa_fit_client
+    else:
+        fitting_function = fit_client
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(fit_client, client_proxy, ins, timeout)
+            executor.submit(fitting_function, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -319,7 +331,8 @@ def fit_clients(
         )
 
     # Gather results
-    results: List[Tuple[ClientProxy, FitRes]] = []
+    # results: List[Tuple[ClientProxy, FitRes]] = []
+    results = []
     failures: List[BaseException] = []
     for future in finished_fs:
         failure = future.exception()
@@ -337,6 +350,17 @@ def fit_client(
 ) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout)
+    return client, fit_res
+
+def dpsa_fit_client(
+    client: ClientProxy, ins: FitIns, timeout: Optional[float]
+) -> Tuple[ClientProxy, DpsaFitDone]:
+    """Refine parameters on a single client."""
+    print("=================================")
+    print("== >> In dpsa fit client")
+    fit_res = client.dpsa_fit(ins, timeout=timeout)
+    print("== >> Got result: " + str(fit_res))
+    print("=================================")
     return client, fit_res
 
 

@@ -11,22 +11,28 @@ if __name__ == "__main__":
     # Load CIFAR-10 dataset
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-    # Define Flower client
-    class CifarClient(fl.client.NumPyClient):
+    # Define Flower client, dpsa
+    class CifarClient(fl.client.DpsaNumPyClient):
         def get_parameters(self):  # type: ignore
             return model.get_weights()
 
-        def fit(self, parameters, config):  # type: ignore
+        def dpsa_fit(self, parameters, config):  # type: ignore
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-            return model.get_weights(), len(x_train)
+            weights = model.get_weights()
+            print("Hey, my weights have length:")
+            print(len(weights))
+            return true, weights, len(x_train)
+
+        def fit(self, parameters, config):
+            return None
 
         def evaluate(self, parameters, config):  # type: ignore
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
-            return len(x_test), loss, accuracy
+            return loss, len(x_test), accuracy
 
     # Start Flower client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_dpsa_numpy_client("[::]:8080", client=CifarClient())
 
 

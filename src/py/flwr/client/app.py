@@ -26,9 +26,10 @@ from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .numpy_client import NumPyClient, NumPyClientWrapper
+from .dpsa_numpy_client import DpsaNumPyClient, DpsaNumPyClientWrapper
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
 
-ClientLike = Union[Client, NumPyClient]
+ClientLike = Union[Client, NumPyClient, DpsaNumPyClient]
 
 
 def start_client(
@@ -161,6 +162,75 @@ def start_numpy_client(
 
     # Wrap the NumPyClient
     flower_client = NumPyClientWrapper(client)
+
+    # Delete get_properties method from NumPyClientWrapper if the user-provided
+    # NumPyClient instance does not implement get_properties. This enables the
+    # following call to start_client to handle NumPyClientWrapper instances like any
+    # other Client instance (which might or might not implement get_properties).
+    if not numpyclient_has_get_properties(client=client):
+        del NumPyClientWrapper.get_properties
+
+    # Start
+    start_client(
+        server_address=server_address,
+        client=flower_client,
+        grpc_max_message_length=grpc_max_message_length,
+        root_certificates=root_certificates,
+    )
+
+
+def start_dpsa_numpy_client(
+    server_address: str,
+    client: DpsaNumPyClient,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[bytes] = None,
+) -> None:
+    """Start a Flower NumPyClient which connects to a gRPC server.
+
+    Parameters
+    ----------
+        server_address: str. The IPv6 address of the server. If the Flower
+            server runs on the same machine on port 8080, then `server_address`
+            would be `"[::]:8080"`.
+        client: flwr.client.NumPyClient. An implementation of the abstract base
+            class `flwr.client.NumPyClient`.
+        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
+            The maximum length of gRPC messages that can be exchanged with the
+            Flower server. The default should be sufficient for most models.
+            Users who train very large models might need to increase this
+            value. Note that the Flower server needs to be started with the
+            same value (see `flwr.server.start_server`), otherwise it will not
+            know about the increased limit and block larger messages.
+        root_certificates: bytes (default: None)
+            The PEM-encoded root certificates a byte string. If provided, a secure
+            connection using the certificates will be established to a
+            SSL-enabled Flower server.
+
+    Returns
+    -------
+        None
+
+    Examples
+    --------
+    Starting a client with an insecure server connection:
+
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>> )
+
+    Starting a SSL-enabled client:
+
+    >>> from pathlib import Path
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
+    >>> )
+    """
+
+    # Wrap the NumPyClient
+    flower_client = DpsaNumPyClientWrapper(client)
 
     # Delete get_properties method from NumPyClientWrapper if the user-provided
     # NumPyClient instance does not implement get_properties. This enables the

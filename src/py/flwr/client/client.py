@@ -22,6 +22,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    DpsaFitDone,
     ParametersRes,
     PropertiesIns,
     PropertiesRes,
@@ -72,6 +73,11 @@ class Client(ABC):
         FitRes
             The training result containing updated parameters and other details
             such as the number of local training examples used for training.
+        """
+
+    @abstractmethod
+    def dpsa_fit(self, ins: FitIns) -> DpsaFitDone:
+        """Refine the provided weights using the locally held dataset, and send them to the dpsa aggregators.
         """
 
     @abstractmethod

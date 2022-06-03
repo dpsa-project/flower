@@ -85,6 +85,24 @@ class GrpcClientProxy(ClientProxy):
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
 
+    def fit(
+        self,
+        ins: common.FitIns,
+        timeout: Optional[float],
+    ) -> common.DpsaFitDone:
+        """Refine the provided weights using the locally held dataset."""
+        fit_ins_msg = serde.fit_ins_to_proto(ins)
+
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(fit_ins=fit_ins_msg),
+                timeout=timeout,
+            )
+        )
+        client_msg: ClientMessage = res_wrapper.client_message
+        fit_res = serde.fit_res_from_proto(client_msg.fit_res)
+        return fit_res
+
     def evaluate(
         self,
         ins: common.EvaluateIns,

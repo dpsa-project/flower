@@ -63,6 +63,14 @@ class ClientProxy(ABC):
         """Refine the provided weights using the locally held dataset."""
 
     @abstractmethod
+    def dpsa_fit(
+        self,
+        ins: FitIns,
+        timeout: Optional[float],
+    ) -> DpsaFitDone:
+        """Refine the provided weights using the locally held dataset."""
+
+    @abstractmethod
     def evaluate(
         self,
         ins: EvaluateIns,

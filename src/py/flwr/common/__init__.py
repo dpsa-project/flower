@@ -26,6 +26,7 @@ from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
 from .typing import FitRes as FitRes
+from .typing import DpsaFitDone as DpsaFitDone
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
 from .typing import Parameters as Parameters
@@ -49,6 +50,7 @@ __all__ = [
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "DpsaFitDone",
     "GRPC_MAX_MESSAGE_LENGTH",
     "Metrics",
     "MetricsAggregationFn",

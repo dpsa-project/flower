@@ -16,4 +16,14 @@
 # ==============================================================================
 
 # Start a Flower server
-python -m flwr_example.tensorflow_minimal.server
+# python -m flwr_example.tensorflow_minimal.server
+
+# get script location (from https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel)
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
+
+# change into the src/py folder of the flower source
+cd "$SCRIPT_DIR/../src/py"
+
+python -m flwr.dpsa.dpsa_minimal.server
+
+

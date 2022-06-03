@@ -82,6 +82,15 @@ class FitRes:
     num_examples: int
     metrics: Dict[str, Scalar]
 
+@dataclass
+class DpsaFitDone:
+    """Response from a client, saying that fitting was done."""
+
+    # parameters: Parameters
+    success: bool
+    num_examples: int
+    metrics: Dict[str, Scalar]
+
 
 @dataclass
 class EvaluateIns:
