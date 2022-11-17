@@ -39,18 +39,27 @@ class DPSAServer(Server):
 
         # check for none:
         if res is not None:
-            params, scalars, results = res
-            if params is None:
-                log(DEBUG, "parameters returned were none.")
-                return None
-            else:
-                l: int = len(params.tensors)
+            params, scalars, (results, failures) = res
+
+            # check for each result
+            for proxy, fitres in results:
+                l: int = len(fitres.parameters.tensors)
                 if l > 0:
-                    log(DEBUG, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
-                    return None
-                else:
-                    log(DEBUG, "Got empty params, yay!")
-                    return params, scalars, results
+                    log(DEBUG, "client {}: Expected params to be empty, because running dpsa server. But it had length {}".format(proxy.cid, l))
+
+
+            return res
+            # if params is None:
+            #     log(DEBUG, "parameters returned were none.")
+            #     return None
+            # else:
+            #     l: int = len(params.tensors)
+            #     if l > 0:
+            #         log(DEBUG, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
+            #         return None
+            #     else:
+            #         log(DEBUG, "Got empty params, yay!")
+            #         return params, scalars, results
 
         else:
             return None
