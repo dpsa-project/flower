@@ -35,7 +35,7 @@ class DPSAServer(Server):
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-        res = super.fit_round(server_round, timeout)
+        res = super().fit_round(server_round, timeout)
 
         return res
 
