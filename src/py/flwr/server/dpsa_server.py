@@ -41,14 +41,15 @@ class DPSAServer(Server):
         if res is not None:
             params, scalars, results = res
             if params is None:
-                log(1, "parameters returned were none.")
+                log(DEBUG, "parameters returned were none.")
                 return None
             else:
                 l: int = len(params.tensors)
                 if l > 0:
-                    log(1, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
+                    log(DEBUG, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
                     return None
                 else:
+                    log(DEBUG, "Got empty params, yay!")
                     return params, scalars, results
 
         else:
