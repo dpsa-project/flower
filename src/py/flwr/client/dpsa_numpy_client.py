@@ -33,7 +33,8 @@ class DPSANumPyClient(NumPyClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
-        return self.client.fit(parameters, config)
+        params, i, d = self.client.fit(parameters, config)
+        return [], i, d
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
