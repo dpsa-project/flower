@@ -37,7 +37,23 @@ class DPSAServer(Server):
         """Perform a single round of federated averaging."""
         res = super().fit_round(server_round, timeout)
 
-        return res
+        # check for none:
+        if res is not None:
+            params, scalars, results = res
+            if params is None:
+                log(1, "parameters returned were none.")
+                return None
+            else:
+                l: int = len(params.tensors)
+                if l > 0:
+                    log(1, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
+                    return None
+                else:
+                    return params, scalars, results
+
+        else:
+            return None
+
 
 
 
