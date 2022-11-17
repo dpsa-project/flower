@@ -22,11 +22,13 @@ from .app import start_numpy_client as start_numpy_client
 from .app import to_client as to_client
 from .client import Client as Client
 from .numpy_client import NumPyClient as NumPyClient
+from .dpsa_numpy_client import DPSANumPyClient as DPSANumPyClient
 
 __all__ = [
     "Client",
     "ClientLike",
     "NumPyClient",
+    "DPSANumPyClient",
     "run_client",
     "start_client",
     "start_numpy_client",
