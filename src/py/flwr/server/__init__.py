@@ -22,6 +22,7 @@ from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .history import History as History
 from .server import Server as Server
+from .dpsa_server import DPSAServer as DPSAServer
 
 __all__ = [
     "ClientManager",
@@ -29,6 +30,7 @@ __all__ = [
     "History",
     "run_server",
     "Server",
+    "DPSAServer",
     "SimpleClientManager",
     "start_server",
 ]
