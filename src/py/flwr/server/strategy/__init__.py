@@ -25,6 +25,7 @@ from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedyogi import FedYogi as FedYogi
 from .qfedavg import QFedAvg as QFedAvg
+from .dpsa_strategy_wrapper import DPSAStrategyWrapper as DPSAStrategyWrapper
 from .strategy import Strategy as Strategy
 
 __all__ = [
@@ -38,5 +39,6 @@ __all__ = [
     "FedYogi",
     "QFedAvg",
     "FedMedian",
+    "DPSAStrategyWrapper",
     "Strategy",
 ]
