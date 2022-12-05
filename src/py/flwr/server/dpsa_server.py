@@ -6,6 +6,8 @@ import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
+from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, PyControllerState
+
 from flwr.common import (
     Code,
     DisconnectRes,
@@ -27,6 +29,15 @@ from flwr.server.server import Server, FitResultsAndFailures
 
 class DPSAServer(Server):
 
+    def __init__(self, dpsa4fl_state: PyControllerState, *, client_manager: ClientManager, strategy: Optional[Strategy] = None) -> None:
+        super().__init__(client_manager=client_manager, strategy=strategy)
+
+        # call dpsa4fl to create new state
+        self.dpsa4fl_state = dpsa4fl_state
+
+        # call dpsa4fl to create new session
+        controller_api__create_session(self.dpsa4fl_state)
+
     def fit_round(
         self,
         server_round: int,
@@ -34,6 +45,12 @@ class DPSAServer(Server):
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
+        # first, call dpsa4fl to start a new round
+        task_id = controller_api__start_round(self.dpsa4fl_state)
+
+        # next, send these parameters to the clients
+        # sending the correct task_id is taken care of by the `DPSAStrategyWrapper`
+
         """Perform a single round of federated averaging."""
         res = super().fit_round(server_round, timeout)
 
