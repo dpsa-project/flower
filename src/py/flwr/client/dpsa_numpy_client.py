@@ -44,10 +44,11 @@ class DPSANumPyClient(NumPyClient):
         params, i, d = self.client.fit(parameters, config)
 
         # fake data to submit
-        data = 0.0
+        flat_params = [p.flatten() for p in parameters]
+        flat_param_vector = np.concatenate(flat_params)
 
         # submit data to janus
-        client_api__submit(self.dpsa4fl_client_state, task_id, data)
+        client_api__submit(self.dpsa4fl_client_state, task_id, flat_param_vector)
 
         # return empty
         return [], i, d
