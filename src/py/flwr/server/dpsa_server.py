@@ -6,7 +6,7 @@ import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
-from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, PyControllerState
+from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, controller_api__collect, PyControllerState
 
 from flwr.common import (
     Code,
@@ -63,6 +63,11 @@ class DPSAServer(Server):
                 l: int = len(fitres.parameters.tensors)
                 if l > 0:
                     log(DEBUG, "client {}: Expected params to be empty, because running dpsa server. But it had length {}".format(proxy.cid, l))
+
+            # collect results from janus
+            print("Getting results from janus")
+            controller_api__collect(self.dpsa4fl_state)
+            print("Done getting results from janus")
 
 
             return res
