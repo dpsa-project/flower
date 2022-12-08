@@ -47,6 +47,13 @@ class DPSANumPyClient(NumPyClient):
         flat_params = [p.flatten() for p in parameters]
         flat_param_vector = np.concatenate(flat_params)
         print("vector length is: ", flat_param_vector.shape)
+        norm = np.linalg.norm(flat_param_vector)
+        print("norm of vector is: ", norm)
+        if norm > 1:
+            print("Need to scale vector")
+            flat_param_vector = flat_param_vector * (1/norm)
+            norm = np.linalg.norm(flat_param_vector)
+            print("now norm of vector is: ", norm)
 
         # submit data to janus
         client_api__submit(self.dpsa4fl_client_state, task_id, flat_param_vector)
