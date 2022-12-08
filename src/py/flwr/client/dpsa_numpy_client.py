@@ -46,6 +46,7 @@ class DPSANumPyClient(NumPyClient):
         # fake data to submit
         flat_params = [p.flatten() for p in parameters]
         flat_param_vector = np.concatenate(flat_params)
+        print("vector length is: ", flat_param_vector.len)
 
         # submit data to janus
         client_api__submit(self.dpsa4fl_client_state, task_id, flat_param_vector)

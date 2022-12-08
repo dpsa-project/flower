@@ -66,7 +66,7 @@ class DPSAServer(Server):
 
             # collect results from janus
             print("Getting results from janus")
-            controller_api__collect(self.dpsa4fl_state)
+            collected = controller_api__collect(self.dpsa4fl_state)
             print("Done getting results from janus")
 
 
