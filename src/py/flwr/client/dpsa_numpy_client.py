@@ -51,7 +51,7 @@ class DPSANumPyClient(NumPyClient):
         print("norm of vector is: ", norm)
         if norm > 1:
             print("Need to scale vector")
-            flat_param_vector = flat_param_vector * (1/norm)
+            flat_param_vector = flat_param_vector * (1/(norm + 0.01))
             norm = np.linalg.norm(flat_param_vector)
             print("now norm of vector is: ", norm)
 
