@@ -22,10 +22,10 @@ from dpsa4fl_bindings import client_api__new_state, client_api__submit
 
 class DPSANumPyClient(NumPyClient):
 
-    def __init__(self, client: NumPyClient) -> None:
+    def __init__(self, dpsa4fl_client_state, client: NumPyClient) -> None:
         super().__init__()
         self.client = client
-        self.dpsa4fl_client_state = client_api__new_state()
+        self.dpsa4fl_client_state = dpsa4fl_client_state
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         return self.client.get_properties(config)
