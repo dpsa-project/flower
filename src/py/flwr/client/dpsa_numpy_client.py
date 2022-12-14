@@ -46,6 +46,8 @@ class DPSANumPyClient(NumPyClient):
         # fake data to submit
         flat_params = [p.flatten() for p in parameters]
         flat_param_vector = np.concatenate(flat_params)
+        flat_param_vector = flat_param_vector - flat_param_vector
+
         print("vector length is: ", flat_param_vector.shape)
         norm = np.linalg.norm(flat_param_vector)
         print("norm of vector is: ", norm)
