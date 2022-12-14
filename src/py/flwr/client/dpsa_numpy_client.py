@@ -47,7 +47,7 @@ class DPSANumPyClient(NumPyClient):
         flat_params = [p.flatten() for p in parameters]
         flat_param_vector = np.concatenate(flat_params)
         flat_param_vector = flat_param_vector - flat_param_vector
-        flat_param_vector = np.zeros((20), dtype=float32)
+        flat_param_vector = np.zeros((20), dtype=np.float32)
 
         print("vector length is: ", flat_param_vector.shape)
         norm = np.linalg.norm(flat_param_vector)
