@@ -80,6 +80,7 @@ class DPSAStrategyWrapper(Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         # we do our custom aggregation code here.
         # copied from FedAvg
+        print("inside aggregate fit")
 
         """Aggregate fit results using weighted average."""
         if not results:

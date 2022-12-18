@@ -234,6 +234,7 @@ class Server:
             len(failures),
         )
 
+        print("calling aggregate_fit")
         # Aggregate training results
         aggregated_result: Tuple[
             Optional[Parameters],
