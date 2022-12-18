@@ -43,6 +43,11 @@ class DPSANumPyClient(NumPyClient):
         # train on data
         params, i, d = self.client.fit(parameters, config)
 
+        # print param shapes
+        print("The shapes are:")
+        for p in params:
+            print(p.shape)
+
         # fake data to submit
         flat_params = [p.flatten() for p in parameters]
         flat_param_vector = np.concatenate(flat_params)
