@@ -43,12 +43,12 @@ class DPSANumPyClient(NumPyClient):
         if (self.shapes is not None) and (self.split_indices is not None):
             assert len(self.split_indices) + 1 == len(self.shapes), "Expected #indices = #shapes - 1"
 
-            print("In follow-up round, reshaping.")
+            print("In follow-up round, reshaping. length of params is: ", len(parameters))
             assert len(parameters) == 1, "Expected parameters to have length 1!"
 
             single_array = parameters[0]
             print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
-            assert single_array.shape == (1,), "Wrong ndarray shape!"
+            # assert single_array.shape == (,), "Wrong ndarray shape!"
 
             # split and reshape
             arrays = np.split(single_array, self.split_indices)
