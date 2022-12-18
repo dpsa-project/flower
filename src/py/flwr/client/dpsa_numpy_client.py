@@ -52,9 +52,9 @@ class DPSANumPyClient(NumPyClient):
 
             # split and reshape
             arrays = np.split(single_array, self.split_indices)
-            for (a, s) in zip(arrays, self.shapes):
-                np.reshape(a, s)
+            print("After splitting, have ", len(arrays), " arrays")
 
+            arrays = [np.reshape(a,s) for (a,s) in zip(arrays, self.shapes)]
             print("Now have the following shapes:")
             for a in arrays:
                 print(a.shape)
