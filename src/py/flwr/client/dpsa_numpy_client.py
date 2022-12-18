@@ -41,10 +41,10 @@ class DPSANumPyClient(NumPyClient):
         # But if we are in any following round, then we need to take our previous shapes
         # and lengths and reshape the `parameters` argument accordingly
         if (self.shapes is not None) and (self.split_indices is not None):
-            assert self.split_indices.len() + 1 == self.shapes.len(), "Expected #indices = #shapes - 1"
+            assert len(self.split_indices) + 1 == len(self.shapes), "Expected #indices = #shapes - 1"
 
             print("In follow-up round, reshaping.")
-            assert parameters.len() == 1, "Expected parameters to have length 1!"
+            assert len(parameters) == 1, "Expected parameters to have length 1!"
 
             single_array = parameters[0]
             print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
