@@ -39,10 +39,11 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 # flake8: noqa: E501
 class DPSAStrategyWrapper(Strategy):
     """Configurable FedAvg strategy implementation."""
-    def __init__(self, strategy: Strategy, dpsa4fl_state: PyControllerState) -> None:
+    def __init__(self, strategy: Strategy, dpsa4fl_state: PyControllerState, expected_gradient_len=None) -> None:
         super().__init__()
         self.strategy = strategy
         self.dpsa4fl_state = dpsa4fl_state
+        self.expected_gradient_len = expected_gradient_len
 
         # variables for FedAvg aggregate_fit
         self.accept_failures = True
@@ -110,7 +111,11 @@ class DPSAStrategyWrapper(Strategy):
         collected = controller_api__collect(self.dpsa4fl_state)
         print("Done getting results from janus")
 
-        flat_array = np.zeros(controller_api__get_gradient_len(self.dpsa4fl_state))
+        grad_len = controller_api__get_gradient_len(self.dpsa4fl_state)
+        if self.expected_gradient_len:
+            grad_len = self.expected_gradient_len
+
+        flat_array = np.zeros(grad_len)
 
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
