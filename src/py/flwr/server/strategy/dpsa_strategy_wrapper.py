@@ -84,27 +84,27 @@ class DPSAStrategyWrapper(Strategy):
 
         """Aggregate fit results using weighted average."""
         if not results:
-            print("Don't have results, return None.")
-            return None, {}
+            print("Don't have results, skip.")
+            # return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            print("Have failures, return None.")
-            return None, {}
+            print("Have failures, skip.")
+            # return None, {}
 
         # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
-        ]
+        # weights_results = [
+        #     (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+        #     for _, fit_res in results
+        # ]
 
         # do DPSA aggregation
         #
         # check that we got empty arrays, because we want to get our params
         # from the janus server
-        for weights in weights_results:
-            l: int = len(weights)
-            print("got result with flwr param len ", l)
-            assert l == 0
+        # for weights in weights_results:
+        #     l: int = len(weights)
+        #     print("got result with flwr param len ", l)
+        #     assert l == 0
 
         print("Getting results from janus")
         collected = controller_api__collect(self.dpsa4fl_state)

@@ -48,7 +48,7 @@ class DPSAServer(Server):
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         # first, call dpsa4fl to start a new round
-        # task_id = controller_api__start_round(self.dpsa4fl_state)
+        task_id = controller_api__start_round(self.dpsa4fl_state)
 
         # next, send these parameters to the clients
         # sending the correct task_id is taken care of by the `DPSAStrategyWrapper`
