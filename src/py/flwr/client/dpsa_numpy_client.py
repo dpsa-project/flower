@@ -26,6 +26,8 @@ class DPSANumPyClient(NumPyClient):
         super().__init__()
         self.client = client
         self.dpsa4fl_client_state = dpsa4fl_client_state
+        self.shapes = None
+        self.split_indices = None
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         return self.client.get_properties(config)
@@ -40,6 +42,35 @@ class DPSANumPyClient(NumPyClient):
         # get current task_id
         task_id = config['task_id']
 
+        # update parameter shapes
+        # if we are in first round (self.shapes is None), then we don't need to reshape.
+        # But if we are in any following round, then we need to take our previous shapes
+        # and lengths and reshape the `parameters` argument accordingly
+        if (self.shapes is not None) and (self.split_indices is not None):
+            assert self.split_indices.len() + 1 == self.shapes.len(), "Expected #indices = #shapes - 1"
+
+            print("In follow-up round, reshaping.")
+            assert parameters.len() == 1, "Expected parameters to have length 1!"
+
+            single_array = parameters[0]
+            print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
+            assert single_array.shape == (1,), "Wrong ndarray shape!"
+
+            # split and reshape
+            arrays = np.split(single_array, self.split_indices)
+            for (a, s) in zip(arrays, self.shapes):
+                np.reshape(a, s)
+
+            print("Now have the following shapes:")
+            for a in arrays:
+                print(a.shape)
+
+            # change parameters to properly shaped list of arrays
+            parameters = arrays
+
+        else:
+            print("In first round, not reshaping.")
+
         # train on data
         params, i, d = self.client.fit(parameters, config)
 
@@ -48,8 +79,22 @@ class DPSANumPyClient(NumPyClient):
         for p in params:
             print(p.shape)
 
-        # fake data to submit
-        flat_params = [p.flatten() for p in parameters]
+        # flatten params before submitting
+        self.shapes = [p.shape for p in parameters]
+        flat_params = [p.flatten('C') for p in parameters] #TODO: Check in which order we need to flatten here
+        p_lengths = [p.size for p in flat_params]
+
+        # loop
+        # (convert p_lengths into indices because ndarray.split takes indices instead of lengths)
+        split_indices = []
+        current_index = 0
+        for l in p_lengths:
+            split_indices.append(current_index)
+            current_index += l
+        split_indices.pop(0) # need to throw away first element of list
+        self.split_indices = split_indices
+
+
         flat_param_vector = np.concatenate(flat_params)
         flat_param_vector = flat_param_vector - flat_param_vector
         flat_param_vector = np.zeros((20), dtype=np.float32)
