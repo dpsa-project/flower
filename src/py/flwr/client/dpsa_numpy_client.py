@@ -35,13 +35,7 @@ class DPSANumPyClient(NumPyClient):
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         return self.client.get_parameters(config)
 
-    def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
-
-        # get current task_id
-        task_id = config['task_id']
-
+    def reshape_parameters(self, parameters: NDArrays) -> NDArrays:
         # update parameter shapes
         # if we are in first round (self.shapes is None), then we don't need to reshape.
         # But if we are in any following round, then we need to take our previous shapes
@@ -70,6 +64,18 @@ class DPSANumPyClient(NumPyClient):
 
         else:
             print("In first round, not reshaping.")
+
+        return parameters
+
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+
+        # get current task_id
+        task_id = config['task_id']
+
+        #reshape params
+        parameters = self.reshape_parameters(parameters)
 
         # train on data
         params, i, d = self.client.fit(parameters, config)
@@ -117,6 +123,7 @@ class DPSANumPyClient(NumPyClient):
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
+        parameters = self.reshape_parameters(parameters)
         return self.client.evaluate(parameters, config)
 
 
