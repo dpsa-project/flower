@@ -39,7 +39,13 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 # flake8: noqa: E501
 class DPSAStrategyWrapper(Strategy):
     """Configurable FedAvg strategy implementation."""
-    def __init__(self, strategy: Strategy, dpsa4fl_state: PyControllerState, expected_gradient_len=None) -> None:
+    def __init__(self,
+                 strategy: Strategy,
+                 dpsa4fl_state: PyControllerState,
+                 expected_gradient_len=None,
+                 *,
+                 fit_metrics_aggregation_fn=None,
+                 ) -> None:
         super().__init__()
         self.strategy = strategy
         self.dpsa4fl_state = dpsa4fl_state
@@ -48,7 +54,7 @@ class DPSAStrategyWrapper(Strategy):
         # variables for FedAvg aggregate_fit
         self.accept_failures = True
         # self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
-        self.fit_metrics_aggregation_fn = None
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
 
 
     def initialize_parameters(
