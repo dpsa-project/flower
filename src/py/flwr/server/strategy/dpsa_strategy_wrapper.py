@@ -115,7 +115,7 @@ class DPSAStrategyWrapper(Strategy):
         if self.expected_gradient_len:
             grad_len = self.expected_gradient_len
 
-        flat_array = collected # np.zeros(grad_len)
+        flat_array = collected.astype(np.float32) # np.zeros(grad_len)
 
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
