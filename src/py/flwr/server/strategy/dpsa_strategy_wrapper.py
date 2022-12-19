@@ -108,14 +108,14 @@ class DPSAStrategyWrapper(Strategy):
         #     assert l == 0
 
         print("Getting results from janus")
-        collected = controller_api__collect(self.dpsa4fl_state)
-        print("Done getting results from janus")
+        collected: np.ndarray = controller_api__collect(self.dpsa4fl_state)
+        print("Done getting results from janus, vector length is: ", collected.shape)
 
         grad_len = controller_api__get_gradient_len(self.dpsa4fl_state)
         if self.expected_gradient_len:
             grad_len = self.expected_gradient_len
 
-        flat_array = np.zeros(grad_len)
+        flat_array = collected # np.zeros(grad_len)
 
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 

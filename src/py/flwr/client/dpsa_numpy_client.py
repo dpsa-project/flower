@@ -105,9 +105,10 @@ class DPSANumPyClient(NumPyClient):
         flat_param_vector = flat_param_vector - flat_param_vector
 
         print("vector length is: ", flat_param_vector.shape)
-        flat_param_vector = np.zeros((20), dtype=np.float32)
 
-        print("new vector length is: ", flat_param_vector.shape)
+        # flat_param_vector = np.zeros((20), dtype=np.float32)
+        # print("new vector length is: ", flat_param_vector.shape)
+
         norm = np.linalg.norm(flat_param_vector)
         print("norm of vector is: ", norm)
         if norm > 1:
