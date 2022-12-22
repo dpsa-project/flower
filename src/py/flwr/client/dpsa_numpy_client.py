@@ -98,8 +98,8 @@ class DPSANumPyClient(NumPyClient):
         print(params[0])
 
         # flatten params before submitting
-        self.shapes = [p.shape for p in parameters]
-        flat_params = [p.flatten('C') for p in parameters] #TODO: Check in which order we need to flatten here
+        self.shapes = [p.shape for p in params]
+        flat_params = [p.flatten('C') for p in params] #TODO: Check in which order we need to flatten here
         p_lengths = [p.size for p in flat_params]
 
         # loop
