@@ -50,9 +50,6 @@ class DPSANumPyClient(NumPyClient):
             print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
             # assert single_array.shape == (,), "Wrong ndarray shape!"
 
-            # check that we have our value at position 449
-            print("in flat array at 449 have: ", single_array.flat[449])
-
             # split and reshape
             arrays = np.split(single_array, self.split_indices)
             print("After splitting, have ", len(arrays), " arrays")
@@ -61,6 +58,9 @@ class DPSANumPyClient(NumPyClient):
             print("Now have the following shapes:")
             for a in arrays:
                 print(a.shape)
+
+            # check that we have our value at position 449
+            print("in array at 449 have: ", arrays[0][0:1, 0:1, 0:1, 0:1])
 
             # change parameters to properly shaped list of arrays
             parameters = arrays
@@ -88,6 +88,12 @@ class DPSANumPyClient(NumPyClient):
         for p in params:
             print(p.shape)
 
+        # set value at position 1,0,0,0
+        params[0] = np.zeros((6,3,5,5),dtype=np.float32)
+        params[0][1,0,0,0] = 0.5
+
+        print("in array at have: ", params[0][0:1, 0:1, 0:1, 0:1])
+
         # flatten params before submitting
         self.shapes = [p.shape for p in parameters]
         flat_params = [p.flatten('C') for p in parameters] #TODO: Check in which order we need to flatten here
@@ -107,9 +113,9 @@ class DPSANumPyClient(NumPyClient):
         flat_param_vector = np.concatenate(flat_params)
 
         # test indices locations
-        flat_param_vector = flat_param_vector - flat_param_vector
+        # flat_param_vector = flat_param_vector - flat_param_vector
         # set position number 449 to 1
-        np.put(flat_param_vector, [449], [0.5])
+        # np.put(flat_param_vector, [449], [0.5])
 
         print("vector length is: ", flat_param_vector.shape)
 
