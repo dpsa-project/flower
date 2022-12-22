@@ -61,6 +61,7 @@ class DPSANumPyClient(NumPyClient):
 
             # check that we have our value at position 449
             print("in array at 449 have: ", arrays[0][0:1, 0:1, 0:1, 0:1])
+            print(arrays[0])
 
             # change parameters to properly shaped list of arrays
             parameters = arrays
@@ -93,6 +94,7 @@ class DPSANumPyClient(NumPyClient):
         params[0][1,0,0,0] = 0.5
 
         print("in array at have: ", params[0][0:1, 0:1, 0:1, 0:1])
+        print(params[0])
 
         # flatten params before submitting
         self.shapes = [p.shape for p in parameters]
