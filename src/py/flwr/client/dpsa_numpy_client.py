@@ -60,8 +60,9 @@ class DPSANumPyClient(NumPyClient):
                 print(a.shape)
 
             # check that we have our value at position 449
-            print("in array at 449 have: ", arrays[0][0:1, 0:1, 0:1, 0:1])
-            print(arrays[0])
+            rval1 = np.around(arrays[0], decimals = 2)
+            print("in array at 449 have: ", rval1[0:1, 0:1, 0:1, 0:1])
+            print(rval1)
 
             # change parameters to properly shaped list of arrays
             parameters = arrays
