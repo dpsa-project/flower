@@ -92,7 +92,7 @@ class DPSANumPyClient(NumPyClient):
 
         # set value at position 1,0,0,0
         params[0] = np.zeros((6,3,5,5),dtype=np.float32)
-        params[0][1,0,0,0] = 0.5
+        params[0][1,0,0,0] = 10
 
         print("in array at have: ", params[0][0:1, 0:1, 0:1, 0:1])
         print(params[0])
