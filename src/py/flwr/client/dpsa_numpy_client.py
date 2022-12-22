@@ -109,7 +109,7 @@ class DPSANumPyClient(NumPyClient):
         # test indices locations
         flat_param_vector = flat_param_vector - flat_param_vector
         # set position number 449 to 1
-        np.put(flat_param_vector, [449], [1])
+        np.put(flat_param_vector, [449], [0.5])
 
         print("vector length is: ", flat_param_vector.shape)
 
