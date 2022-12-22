@@ -91,11 +91,11 @@ class DPSANumPyClient(NumPyClient):
             print(p.shape)
 
         # set value at position 1,0,0,0
-        params[0] = np.zeros((6,3,5,5),dtype=np.float32)
-        params[0][1,0,0,0] = 10
+        # params[0] = np.zeros((6,3,5,5),dtype=np.float32)
+        # params[0][1,0,0,0] = 10
 
-        print("in array at have: ", params[0][0:1, 0:1, 0:1, 0:1])
-        print(params[0])
+        # print("in array at have: ", params[0][0:1, 0:1, 0:1, 0:1])
+        # print(params[0])
 
         # flatten params before submitting
         self.shapes = [p.shape for p in params]
