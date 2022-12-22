@@ -50,6 +50,9 @@ class DPSANumPyClient(NumPyClient):
             print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
             # assert single_array.shape == (,), "Wrong ndarray shape!"
 
+            # check that we have our value at position 449
+            print("in flat array at 449 have: ", single_array.flat[449])
+
             # split and reshape
             arrays = np.split(single_array, self.split_indices)
             print("After splitting, have ", len(arrays), " arrays")
@@ -102,7 +105,11 @@ class DPSANumPyClient(NumPyClient):
 
 
         flat_param_vector = np.concatenate(flat_params)
-        # flat_param_vector = flat_param_vector - flat_param_vector
+
+        # test indices locations
+        flat_param_vector = flat_param_vector - flat_param_vector
+        # set position number 449 to 1
+        np.put(flat_param_vector, [449], [1])
 
         print("vector length is: ", flat_param_vector.shape)
 
