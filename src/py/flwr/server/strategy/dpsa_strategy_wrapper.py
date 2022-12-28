@@ -84,6 +84,7 @@ class DPSAStrategyWrapper(Strategy):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        old_params: Parameters,
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         # we do our custom aggregation code here.
         # copied from FedAvg
@@ -121,12 +122,14 @@ class DPSAStrategyWrapper(Strategy):
         if self.expected_gradient_len:
             grad_len = self.expected_gradient_len
 
-        flat_array = collected.astype(np.float32) # np.zeros(grad_len)
+        flat_grad_array = collected.astype(np.float32) # np.zeros(grad_len)
+
+        # add gradient to current params
+        flat_param_array = old_params + flat_grad_array
 
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
-        # for now fake result
-        parameters_aggregated = ndarrays_to_parameters([flat_array])
+        parameters_aggregated = ndarrays_to_parameters([flat_param_array])
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

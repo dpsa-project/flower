@@ -15,7 +15,7 @@ import numpy as np
 
 from flwr.client.numpy_client import NumPyClient
 from flwr.common.dp import add_gaussian_noise, clip_by_l2
-from flwr.common.typing import Config, NDArrays, Scalar
+from flwr.common.typing import Config, NDArrays, NDArray, Scalar
 
 from dpsa4fl_bindings import client_api__new_state, client_api__submit
 
@@ -72,19 +72,7 @@ class DPSANumPyClient(NumPyClient):
 
         return parameters
 
-    def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
-
-        # get current task_id
-        task_id = config['task_id']
-
-        #reshape params
-        parameters = self.reshape_parameters(parameters)
-
-        # train on data
-        params, i, d = self.client.fit(parameters, config)
-
+    def flatten_parameters(self, params: NDArrays) -> NDArray:
         # print param shapes
         print("The shapes are:")
         for p in params:
@@ -125,16 +113,36 @@ class DPSANumPyClient(NumPyClient):
         # flat_param_vector = np.zeros((20), dtype=np.float32)
         # print("new vector length is: ", flat_param_vector.shape)
 
-        norm = np.linalg.norm(flat_param_vector)
+        return flat_param_vector
+
+    def fit(
+        self, params0: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+
+        # get current task_id
+        task_id = config['task_id']
+
+        #reshape params
+        params0 = self.reshape_parameters(params0)
+
+        # train on data
+        params, i, d = self.client.fit(params0, config)
+
+        # compute gradient
+        grad = [np.subtract(p, p0) for (p , p0) in zip(params,params0)]
+
+        flat_grad_vector = self.flatten_parameters(grad)
+
+        norm = np.linalg.norm(flat_grad_vector)
         print("norm of vector is: ", norm)
         if norm > 1:
             print("Need to scale vector")
-            flat_param_vector = flat_param_vector * (1/(norm + 0.01))
-            norm = np.linalg.norm(flat_param_vector)
+            flat_grad_vector = flat_grad_vector * (1/(norm + 0.01))
+            norm = np.linalg.norm(flat_grad_vector)
             print("now norm of vector is: ", norm)
 
         # submit data to janus
-        client_api__submit(self.dpsa4fl_client_state, task_id, flat_param_vector)
+        client_api__submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
 
         # return empty
         return [], i, d

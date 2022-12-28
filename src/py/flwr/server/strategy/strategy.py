@@ -74,6 +74,7 @@ class Strategy(ABC):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        old_params: Parameters,
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
