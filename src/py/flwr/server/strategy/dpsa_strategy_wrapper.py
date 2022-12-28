@@ -124,10 +124,16 @@ class DPSAStrategyWrapper(Strategy):
 
         flat_grad_array = collected.astype(np.float32) # np.zeros(grad_len)
 
-        old_params_array = parameters_to_ndarrays(old_params)[0]
+        old_params_arrays = parameters_to_ndarrays(old_params)
+        flat_old_params_array = old_params_arrays[0]
+
+        # if old params is not flat, need to flatten
+        if len(old_params_arrays) > 1:
+            flat_old_params = [p.flatten('C') for p in old_params_arrays] #TODO: Check in which order we need to flatten here
+            flat_old_params_array = np.concatenate(flat_old_params)
 
         # add gradient to current params
-        flat_param_array = old_params_array + flat_grad_array
+        flat_param_array = flat_old_params_array + flat_grad_array
 
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
