@@ -40,6 +40,7 @@ class DPSAServer(Server):
         # call dpsa4fl to create new session
         controller_api__create_session(self.dpsa4fl_state)
 
+    """Perform a single round of federated averaging."""
     def fit_round(
         self,
         server_round: int,
@@ -47,53 +48,15 @@ class DPSAServer(Server):
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        # first, call dpsa4fl to start a new round
-        task_id = controller_api__start_round(self.dpsa4fl_state)
+        # Call dpsa4fl to start a new round
+        controller_api__start_round(self.dpsa4fl_state)
 
-        # next, send these parameters to the clients
-        # sending the correct task_id is taken care of by the `DPSAStrategyWrapper`
+        # The rest of the work is done by the `DPSAStrategyWrapper`
+        # which is called in the server implementation of super.
 
-        """Perform a single round of federated averaging."""
         res = super().fit_round(server_round, timeout)
 
         return res
-
-        # # check for none:
-        # if res is not None:
-        #     params, scalars, (results, failures) = res
-
-        #     # check for each result
-        #     for proxy, fitres in results:
-        #         l: int = len(fitres.parameters.tensors)
-        #         if l > 0:
-        #             log(DEBUG, "client {}: Expected params to be empty, because running dpsa server. But it had length {}".format(proxy.cid, l))
-
-        #     # collect results from janus
-        #     print("Getting results from janus")
-        #     collected = controller_api__collect(self.dpsa4fl_state)
-        #     print("Done getting results from janus")
-
-        #     flat_array = np.zeros(controller_api__get_gradient_len(self.dpsa4fl_state))
-
-        #     for proxy, fitres in results:
-        #         fitres.parameters = 
-
-
-        #     return res
-        #     # if params is None:
-        #     #     log(DEBUG, "parameters returned were none.")
-        #     #     return None
-        #     # else:
-        #     #     l: int = len(params.tensors)
-        #     #     if l > 0:
-        #     #         log(DEBUG, "Expected params to be empty, because running dpsa server. But it had length {}".format(l))
-        #     #         return None
-        #     #     else:
-        #     #         log(DEBUG, "Got empty params, yay!")
-        #     #         return params, scalars, results
-
-        # else:
-        #     return None
 
 
 

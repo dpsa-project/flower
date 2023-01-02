@@ -1,10 +1,13 @@
-# DPSA strategy wrapper
+
+#
+# Written as part of DPSA-project, by @MxmUrw, @ooovi
+#
+
+"""Wrapper for using a strategy with DPSA."""
 
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
-
-# from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, PyControllerState
 
 from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, controller_api__collect, controller_api__get_gradient_len, PyControllerState
 
@@ -29,12 +32,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
 # flake8: noqa: E501
 class DPSAStrategyWrapper(Strategy):
@@ -53,9 +50,7 @@ class DPSAStrategyWrapper(Strategy):
 
         # variables for FedAvg aggregate_fit
         self.accept_failures = True
-        # self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -87,42 +82,19 @@ class DPSAStrategyWrapper(Strategy):
         old_params: Parameters,
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         # we do our custom aggregation code here.
-        # copied from FedAvg
-        print("inside aggregate fit")
-
-        """Aggregate fit results using weighted average."""
-        if not results:
-            print("Don't have results, skip.")
-            # return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            print("Have failures, skip.")
-            # return None, {}
-
-        # Convert results
-        # weights_results = [
-        #     (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-        #     for _, fit_res in results
-        # ]
-
-        # do DPSA aggregation
-        #
-        # check that we got empty arrays, because we want to get our params
-        # from the janus server
-        # for weights in weights_results:
-        #     l: int = len(weights)
-        #     print("got result with flwr param len ", l)
-        #     assert l == 0
+        # part of the code is copied from FedAvg
 
         print("Getting results from janus")
         collected: np.ndarray = controller_api__collect(self.dpsa4fl_state)
         print("Done getting results from janus, vector length is: ", collected.shape)
 
+        # make sure that the gradient we got has the correct length
         grad_len = controller_api__get_gradient_len(self.dpsa4fl_state)
         if self.expected_gradient_len:
             grad_len = self.expected_gradient_len
 
-        flat_grad_array = collected.astype(np.float32) # np.zeros(grad_len)
+        # convert ndarray type
+        flat_grad_array = collected.astype(np.float32)
 
         old_params_arrays = parameters_to_ndarrays(old_params)
         flat_old_params_array = old_params_arrays[0]
@@ -135,8 +107,7 @@ class DPSAStrategyWrapper(Strategy):
         # add gradient to current params
         flat_param_array = flat_old_params_array + flat_grad_array
 
-        # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-
+        # encode again in params format
         parameters_aggregated = ndarrays_to_parameters([flat_param_array])
 
         # Aggregate custom metrics if aggregation fn was provided
@@ -148,9 +119,6 @@ class DPSAStrategyWrapper(Strategy):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
-
-
-        # return self.strategy.aggregate_fit(server_round, results, failures)
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
