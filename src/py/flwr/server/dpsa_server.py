@@ -6,7 +6,7 @@ import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
-from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, controller_api__collect, controller_api__get_gradient_len, PyControllerState
+from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__end_session, controller_api__start_round, controller_api__collect, controller_api__get_gradient_len, PyControllerState
 
 from flwr.common import (
     Code,
@@ -39,6 +39,10 @@ class DPSAServer(Server):
 
         # call dpsa4fl to create new session
         controller_api__create_session(self.dpsa4fl_state)
+
+    def __del__(self):
+        # end session when we are done
+        controller_api__end_session(self.dpsa4fl_state)
 
     """Perform a single round of federated averaging."""
     def fit_round(
