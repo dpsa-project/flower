@@ -17,7 +17,7 @@ from flwr.client.numpy_client import NumPyClient
 from flwr.common.dp import add_gaussian_noise, clip_by_l2
 from flwr.common.typing import Config, NDArrays, NDArray, Scalar
 
-from dpsa4fl_bindings import client_api__new_state, client_api__submit
+from dpsa4fl_bindings import client_api_new_state, client_api_submit
 
 
 class DPSANumPyClient(NumPyClient):
@@ -129,7 +129,7 @@ class DPSANumPyClient(NumPyClient):
             print("now norm of vector is: ", norm)
 
         # submit data to janus
-        client_api__submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
+        client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
 
         # return empty
         return [], i, d

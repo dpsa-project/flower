@@ -9,7 +9,7 @@
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__start_round, controller_api__collect, controller_api__get_gradient_len, PyControllerState
+from dpsa4fl_bindings import controller_api_new_state, controller_api_create_session, controller_api_start_round, controller_api_collect, controller_api_get_gradient_len, PyControllerState
 
 import numpy as np
 
@@ -85,11 +85,11 @@ class DPSAStrategyWrapper(Strategy):
         # part of the code is copied from FedAvg
 
         print("Getting results from janus")
-        collected: np.ndarray = controller_api__collect(self.dpsa4fl_state)
+        collected: np.ndarray = controller_api_collect(self.dpsa4fl_state)
         print("Done getting results from janus, vector length is: ", collected.shape)
 
         # make sure that the gradient we got has the correct length
-        grad_len = controller_api__get_gradient_len(self.dpsa4fl_state)
+        grad_len = controller_api_get_gradient_len(self.dpsa4fl_state)
         if self.expected_gradient_len:
             grad_len = self.expected_gradient_len
 

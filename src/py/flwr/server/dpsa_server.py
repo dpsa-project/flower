@@ -6,7 +6,7 @@ import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
-from dpsa4fl_bindings import controller_api__new_state, controller_api__create_session, controller_api__end_session, controller_api__start_round, controller_api__collect, controller_api__get_gradient_len, PyControllerState
+from dpsa4fl_bindings import controller_api_new_state, controller_api_create_session, controller_api_end_session, controller_api_start_round, controller_api_collect, controller_api_get_gradient_len, PyControllerState
 
 from flwr.common import (
     Code,
@@ -38,11 +38,11 @@ class DPSAServer(Server):
         self.dpsa4fl_state = dpsa4fl_state
 
         # call dpsa4fl to create new session
-        controller_api__create_session(self.dpsa4fl_state)
+        controller_api_create_session(self.dpsa4fl_state)
 
     def __del__(self):
         # end session when we are done
-        controller_api__end_session(self.dpsa4fl_state)
+        controller_api_end_session(self.dpsa4fl_state)
 
     """Perform a single round of federated averaging."""
     def fit_round(
@@ -53,7 +53,7 @@ class DPSAServer(Server):
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         # Call dpsa4fl to start a new round
-        controller_api__start_round(self.dpsa4fl_state)
+        controller_api_start_round(self.dpsa4fl_state)
 
         # The rest of the work is done by the `DPSAStrategyWrapper`
         # which is called in the server implementation of super.
