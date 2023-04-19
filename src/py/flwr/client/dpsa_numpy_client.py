@@ -99,6 +99,10 @@ class DPSANumPyClient(NumPyClient):
 
         print("vector length is: ", flat_param_vector.shape)
 
+        # debug: print highest element
+        print("highest nan element is: ", np.amax(flat_param_vector))
+        print("highest nonnan element is: ", np.nanmax(flat_param_vector))
+
         return flat_param_vector
 
     def fit(
