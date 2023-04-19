@@ -50,6 +50,10 @@ class DPSANumPyClient(NumPyClient):
             print("Found single ndarray of shape ", single_array.shape, " and size ", single_array.size)
             # assert single_array.shape == (,), "Wrong ndarray shape!"
 
+            # debug: print highest element
+            print("(reshape) highest nan element is: ", np.amax(single_array))
+            print("(reshape) highest nonnan element is: ", np.nanmax(single_array))
+
             # split and reshape
             arrays = np.split(single_array, self.split_indices)
             print("After splitting, have ", len(arrays), " arrays")
