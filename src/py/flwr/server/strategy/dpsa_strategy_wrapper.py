@@ -110,7 +110,7 @@ class DPSAStrategyWrapper(Strategy):
         # Aggregate custom metrics if aggregation fn was provided
         # the same as what happens in the FedAvg strategy
         metrics_aggregated = {}
-        if hasattr(self.strategy, fit_metrics_aggregation_fn):
+        if hasattr(self.strategy, 'fit_metrics_aggregation_fn'):
             if self.strategy.fit_metrics_aggregation_fn:
                 fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
                 metrics_aggregated = self.strategy.fit_metrics_aggregation_fn(fit_metrics)
