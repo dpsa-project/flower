@@ -7,25 +7,55 @@
 
 """Wrapper for configuring a Flower client for usage with DPSA."""
 
-
-import copy
 from typing import Dict, Tuple
 
 import numpy as np
 
 from flwr.client.numpy_client import NumPyClient
-from flwr.common.dp import add_gaussian_noise, clip_by_l2
 from flwr.common.typing import Config, NDArrays, NDArray, Scalar
 
 from dpsa4fl_bindings import client_api_new_state, client_api_submit
 
 
 class DPSANumPyClient(NumPyClient):
+    """
+    A flower client for federated learning with global differential privacy and
+    secure aggregation. Uses the dpsa project infrastructure, see here
+    for more information: https://github.com/dpsa-project/overview 
+    """
 
-    def __init__(self, dpsa4fl_client_state, client: NumPyClient) -> None:
+    def __init__(
+        self,
+        aggregator1_location: str,
+        aggregator1_helper_location: str,
+        aggregator2_location: str,
+        aggregator2_helper_location: str,
+        client: NumPyClient
+    ) -> None:
+        """
+        Parameters
+        ----------
+        aggregator1_location: str
+            Location of the first aggregator server in URL format including the port.
+            For example, for a server running locally: "http://127.0.0.1:9992"
+        aggregator1_helper_location: str
+            TODO this should not be needed
+        aggregator2_location:
+            Location of the second aggregator server in URL format including the port.
+            For example, for a server running locally: "http://127.0.0.1:9992"
+        aggregator2_helper_location: str
+            TODO this should not be needed 
+        client: NumPyClient
+            The NumPyClient used for executing the local learning tasks.
+        """
         super().__init__()
         self.client = client
-        self.dpsa4fl_client_state = dpsa4fl_client_state
+        self.dpsa4fl_client_state = client_api_new_state(
+            aggregator1_location,
+            aggregator1_helper_location,
+            aggregator2_location,
+            aggregator2_helper_location
+        )
         self.shapes = None
         self.split_indices = None
 
@@ -36,6 +66,23 @@ class DPSANumPyClient(NumPyClient):
         return self.client.get_parameters(config)
 
     def reshape_parameters(self, parameters: NDArrays) -> NDArrays:
+        """
+        Reshape parameters given as a (1,)-NDArray into the Client's model shape,
+        as given in the `shapes` attribute. Used for recovering the shape of a
+        gradient that originated from the DPSA aggregation server and was hence in
+        single-vector shape.
+
+        Parameters
+        ----------
+        parameters: NDArrays
+            The parameters to be reshaped. Expected to be (1,)-shaped.
+
+        Returns
+        -------
+        parameters: NDArrays
+            The input parameters reshaped to match this Client's `shapes` attribute.
+            
+        """
         # update parameter shapes
         # if we are in first round (self.shapes is None), then we don't need to reshape.
         # But if we are in any following round, then we need to take our previous shapes
@@ -77,6 +124,21 @@ class DPSANumPyClient(NumPyClient):
         return parameters
 
     def flatten_parameters(self, params: NDArrays) -> NDArray:
+        """
+        Reshape the input parameters into a (1,)-NDArray to prepare
+        them for sumbission to the DPSA infrastructure.
+
+        Parameters
+        ----------
+        params: NDArrays
+            The parameters to be flattened. Flattening in row-major order.
+
+        Returns
+        -------
+        flat_param_vector: NDArray
+            The input parameters reshaped to one long (1,)-NDArray.
+        """
+        
         # print param shapes
         print("The shapes are:")
         for p in params:
@@ -112,6 +174,33 @@ class DPSANumPyClient(NumPyClient):
     def fit(
         self, params0: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        """
+        Train the provided parameters using the locally held dataset. After
+        training locally using the wrapped NumPyClient, the gradients are
+        clipped to norm 1 and submitted to the DPSA infrastructure for secure
+        aggregation of all clients' gradients and noising for differential privacy.
+
+        Parameters
+        ----------
+        params0 : NDArrays
+            The current (global) model parameters.
+        config : Dict[str, Scalar]
+            Configuration parameters which allow the
+            server to influence training on the client. It can be used to
+            communicate arbitrary values from the server to the client, for
+            example, to set the number of (local) training epochs.
+
+        Returns
+        -------
+        parameters : NDArrays
+            The locally updated model parameters.
+        num_examples : int
+            The number of examples used for training.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of type
+            bool, bytes, float, int, or str. It can be used to communicate
+            arbitrary values back to the server.
+        """ 
 
         # get current task_id
         task_id = config['task_id']

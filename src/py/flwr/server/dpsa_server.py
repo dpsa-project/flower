@@ -1,45 +1,85 @@
 
 """Flower server."""
 
-import concurrent.futures
-import timeit
-from logging import DEBUG, INFO
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple
 
-from dpsa4fl_bindings import controller_api_new_state, controller_api_create_session, controller_api_end_session, controller_api_start_round, controller_api_collect, controller_api_get_gradient_len, PyControllerState
+from dpsa4fl_bindings import controller_api_create_session, controller_api_end_session, controller_api_start_round, controller_api_new_state
 
-from flwr.common import (
-    Code,
-    DisconnectRes,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    ReconnectIns,
-    Scalar,
-)
-from flwr.common.logger import log
-from flwr.common.typing import GetParametersIns
+from flwr.common import Parameters, Scalar
 from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.history import History
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy import Strategy, DPSAStrategyWrapper, FedAvg
 from flwr.server.server import Server, FitResultsAndFailures
 
-import numpy as np
-
 class DPSAServer(Server):
+    """
+    A flower server for federated learning with global differential privacy and
+    secure aggregation. Uses the dpsa project infrastructure, see here
+    for more information: https://github.com/dpsa-project/overview
 
-    def __init__(self, dpsa4fl_state: PyControllerState, *, client_manager: ClientManager, strategy: Optional[Strategy] = None) -> None:
-        super().__init__(client_manager=client_manager, strategy=strategy)
+    NOTE: This is intended for use with the DPSANumPyClient flower client.
+    """ 
 
-        # call dpsa4fl to create new state
-        self.dpsa4fl_state = dpsa4fl_state
+    def __init__(
+        self,
+        model_size: int,
+        privacy_parameter: float,
+        granularity: int,
+        aggregator1_location: str,
+        aggregator1_helper_location: str,
+        aggregator2_location: str,
+        aggregator2_helper_location: str,
+        *,
+        client_manager: ClientManager,
+        strategy: Optional[Strategy] = None
+    ) -> None:
+        """
+        Parameters
+        ----------
+        model_size: int
+            The number of parameters of the model to be trained.
+        privacy_parameter: float
+            The desired privacy per learning step. One aggregation step will
+            be `1/2*privacy_parameter^2` zero-concentrated differentially private
+            for each client.
+        granularity: int
+            The resolution of the fixed-point encoding used for secure aggregation.
+            A larger value will result in a less lossy representation and more
+            communication and computation overhead. Currently, 16, 32 and 64 bit are
+            supported.
+        aggregator1_location: str
+            Location of the first aggregator server in URL format including the port.
+            For example, for a server running locally: "http://127.0.0.1:9992"
+        aggregator1_helper_location: str
+            TODO this should not be needed
+        aggregator2_location: str
+            Location of the second aggregator server in URL format including the port.
+            For example, for a server running locally: "http://127.0.0.1:9992"
+        aggregator2_helper_location: str
+            TODO this should not be needed
+        """
+
+        # call dpsa4fl to create state object
+        self.dpsa4fl_state = controller_api_new_state(
+            model_size,
+            privacy_parameter,
+            granularity,
+            aggregator1_location,
+            aggregator1_helper_location,
+            aggregator2_location,
+            aggregator2_helper_location
+        )
+
+        dpsa4fl_strategy = DPSAStrategyWrapper(
+            strategy if strategy is not None else FedAvg(),
+            self.dpsa4fl_state
+        ) 
+
+        super().__init__(client_manager=client_manager, strategy=dpsa4fl_strategy)
 
         # call dpsa4fl to create new session
         controller_api_create_session(self.dpsa4fl_state)
 
+    """End the dpsa4fl session. Use at the end of training for graceful shutdown."""
     def __del__(self):
         # end session when we are done
         controller_api_end_session(self.dpsa4fl_state)
@@ -57,11 +97,7 @@ class DPSAServer(Server):
 
         # The rest of the work is done by the `DPSAStrategyWrapper`
         # which is called in the server implementation of super.
-
         res = super().fit_round(server_round, timeout)
 
         return res
-
-
-
 
