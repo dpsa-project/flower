@@ -40,21 +40,22 @@ class DPSAStrategyWrapper(Strategy):
     global differential privacy and secure aggregation. To be used together
     with the DPSAServer.
     """
-    def __init__(self,
-                 strategy: Strategy,
-                 dpsa4fl_state: PyControllerState,
-                 ) -> None:
+    def __init__(self, strategy: Strategy, dpsa4fl_state: PyControllerState) -> None:
         """
         Parameters
         ----------
         strategy: Strategy
-        See `dpsa4fl_bindings.controller_api_new_state`
-        for details.
+            The strategy to be wrapped. The wrapping replaces the `configure_fit` and
+            `aggregate_fit` methods with ones that interact with the dpsa
+            infrastructure. All other methods are copied from the input strategy.
+        dpsa4fl_state: PyControllerState
+            State object containing training parameters and server locations necessary
+            for interoperation with dpsa. See `dpsa4fl_bindings.controller_api_new_state`
+            for details.
         """ 
         super().__init__()
         self.strategy = strategy
         self.dpsa4fl_state = dpsa4fl_state
-        self.expected_gradient_len = expected_gradient_len
 
     def initialize_parameters(
         self, client_manager: ClientManager
