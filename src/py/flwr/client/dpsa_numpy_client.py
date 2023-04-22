@@ -14,14 +14,16 @@ import numpy as np
 from flwr.client.numpy_client import NumPyClient
 from flwr.common.typing import Config, NDArrays, NDArray, Scalar
 
-from dpsa4fl_bindings import client_api_new_state, client_api_submit
+from dpsa4fl_bindings import client_api_new_state, client_api_submit, client_api_get_privacy_parameter
 
 
 class DPSANumPyClient(NumPyClient):
     """
     A flower client for federated learning with global differential privacy and
     secure aggregation. Uses the dpsa project infrastructure, see here
-    for more information: https://github.com/dpsa-project/overview 
+    for more information: https://github.com/dpsa-project/overview
+
+    NOTE: This is intended for use with the DPSAServer flower server.
     """
 
     def __init__(
@@ -35,8 +37,8 @@ class DPSANumPyClient(NumPyClient):
         ----------
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
-            For example, for a server running locally: "http://127.0.0.1:9992"
-        aggregator2_location:
+            For example, for a server running locally: "http://127.0.0.1:9991"
+        aggregator2_location: str
             Location of the second aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
         client: NumPyClient
@@ -50,6 +52,7 @@ class DPSANumPyClient(NumPyClient):
         )
         self.shapes = None
         self.split_indices = None
+        self.num_submissions = 0
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         return self.client.get_properties(config)
@@ -218,9 +221,10 @@ class DPSANumPyClient(NumPyClient):
             print("now norm of vector is: ", norm)
 
         # submit data to janus
+        num_submissions += 1
         client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
 
-        # return empty
+        # return empty, parameter update needs to be retrieved from janus
         return [], i, d
 
     def evaluate(
@@ -229,5 +233,18 @@ class DPSANumPyClient(NumPyClient):
         parameters = self.reshape_parameters(parameters)
         return self.client.evaluate(parameters, config)
 
+    def privacy_spent() -> float:
+        """
+        Return the privacy budget spent since the construction of this
+        object. The result is the zero-concentrated differential privacy
+        bound for the local client data.
 
+        Returns
+        -------
+        privacy: float
+            Zero-concentrated Differential Privacy of this client's data
+            spent since DPSANumPyClient object construction.
+        """
+        eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, config['task_id'])
+        return num_submissions * 0.5 * eps^2
 

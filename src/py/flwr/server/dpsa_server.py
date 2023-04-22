@@ -46,7 +46,7 @@ class DPSAServer(Server):
             supported.
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
-            For example, for a server running locally: "http://127.0.0.1:9992"
+            For example, for a server running locally: "http://127.0.0.1:9991"
         aggregator2_location: str
             Location of the second aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
