@@ -53,7 +53,7 @@ class DPSAServer(Server):
         """
 
         # call dpsa4fl to create state object
-        self.dpsa4fl_state = controller_api_new_state(
+        dpsa4fl_state = controller_api_new_state(
             model_size,
             privacy_parameter,
             granularity,
@@ -63,13 +63,15 @@ class DPSAServer(Server):
 
         dpsa4fl_strategy = DPSAStrategyWrapper(
             strategy if strategy is not None else FedAvg(),
-            self.dpsa4fl_state
+            dpsa4fl_state
         )
 
         super().__init__(client_manager=client_manager, strategy=dpsa4fl_strategy)
 
         # call dpsa4fl to create new session
-        controller_api_create_session(self.dpsa4fl_state)
+        controller_api_create_session(dpsa4fl_state)
+        
+        self.dpsa4fl_state = dpsa4fl_state
 
     """End the dpsa4fl session. Use at the end of training for graceful shutdown."""
     def __del__(self):
