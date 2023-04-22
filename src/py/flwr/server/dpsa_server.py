@@ -25,9 +25,7 @@ class DPSAServer(Server):
         privacy_parameter: float,
         granularity: int,
         aggregator1_location: str,
-        aggregator1_helper_location: str,
         aggregator2_location: str,
-        aggregator2_helper_location: str,
         *,
         client_manager: ClientManager,
         strategy: Optional[Strategy] = None
@@ -49,13 +47,9 @@ class DPSAServer(Server):
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
-        aggregator1_helper_location: str
-            TODO this should not be needed
         aggregator2_location: str
             Location of the second aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
-        aggregator2_helper_location: str
-            TODO this should not be needed
         """
 
         # call dpsa4fl to create state object
@@ -64,15 +58,13 @@ class DPSAServer(Server):
             privacy_parameter,
             granularity,
             aggregator1_location,
-            aggregator1_helper_location,
             aggregator2_location,
-            aggregator2_helper_location
         )
 
         dpsa4fl_strategy = DPSAStrategyWrapper(
             strategy if strategy is not None else FedAvg(),
             self.dpsa4fl_state
-        ) 
+        )
 
         super().__init__(client_manager=client_manager, strategy=dpsa4fl_strategy)
 

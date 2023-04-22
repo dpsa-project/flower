@@ -27,9 +27,7 @@ class DPSANumPyClient(NumPyClient):
     def __init__(
         self,
         aggregator1_location: str,
-        aggregator1_helper_location: str,
         aggregator2_location: str,
-        aggregator2_helper_location: str,
         client: NumPyClient
     ) -> None:
         """
@@ -38,13 +36,9 @@ class DPSANumPyClient(NumPyClient):
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
-        aggregator1_helper_location: str
-            TODO this should not be needed
         aggregator2_location:
             Location of the second aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9992"
-        aggregator2_helper_location: str
-            TODO this should not be needed 
         client: NumPyClient
             The NumPyClient used for executing the local learning tasks.
         """
@@ -52,9 +46,7 @@ class DPSANumPyClient(NumPyClient):
         self.client = client
         self.dpsa4fl_client_state = client_api_new_state(
             aggregator1_location,
-            aggregator1_helper_location,
             aggregator2_location,
-            aggregator2_helper_location
         )
         self.shapes = None
         self.split_indices = None
