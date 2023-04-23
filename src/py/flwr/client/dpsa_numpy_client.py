@@ -52,7 +52,7 @@ class DPSANumPyClient(NumPyClient):
         )
         self.shapes = None
         self.split_indices = None
-        self.num_submissions = 0
+        self.privacy_spent = 0
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         return self.client.get_properties(config)
@@ -220,8 +220,11 @@ class DPSANumPyClient(NumPyClient):
             norm = np.linalg.norm(flat_grad_vector)
             print("now norm of vector is: ", norm)
 
+        # log privacy loss
+        eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, config['task_id'])
+        self.num_submissions += eps
+        
         # submit data to janus
-        self.num_submissions += 1
         client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
 
         # return empty, parameter update needs to be retrieved from janus
@@ -245,6 +248,5 @@ class DPSANumPyClient(NumPyClient):
             Zero-concentrated Differential Privacy of this client's data
             spent since DPSANumPyClient object construction.
         """
-        eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, config['task_id'])
-        return self.num_submissions * 0.5 * eps^2
+        return privacy_spent
 
