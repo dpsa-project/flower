@@ -233,7 +233,7 @@ class DPSANumPyClient(NumPyClient):
         parameters = self.reshape_parameters(parameters)
         return self.client.evaluate(parameters, config)
 
-    def privacy_spent() -> float:
+    def privacy_spent(self) -> float:
         """
         Return the privacy budget spent since the construction of this
         object. The result is the zero-concentrated differential privacy
