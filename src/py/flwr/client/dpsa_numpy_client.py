@@ -221,7 +221,7 @@ class DPSANumPyClient(NumPyClient):
             print("now norm of vector is: ", norm)
 
         # submit data to janus
-        num_submissions += 1
+        self.num_submissions += 1
         client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
 
         # return empty, parameter update needs to be retrieved from janus
@@ -246,5 +246,5 @@ class DPSANumPyClient(NumPyClient):
             spent since DPSANumPyClient object construction.
         """
         eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, config['task_id'])
-        return num_submissions * 0.5 * eps^2
+        return self.num_submissions * 0.5 * eps^2
 
