@@ -222,7 +222,7 @@ class DPSANumPyClient(NumPyClient):
 
         # log privacy loss
         eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, task_id)
-        self.num_submissions += eps
+        self.privacy_spent += eps
         
         # submit data to janus
         client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
@@ -248,5 +248,5 @@ class DPSANumPyClient(NumPyClient):
             Zero-concentrated Differential Privacy of this client's data
             spent since DPSANumPyClient object construction.
         """
-        return privacy_spent
+        return self.privacy_spent
 
