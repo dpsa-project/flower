@@ -221,7 +221,7 @@ class DPSANumPyClient(NumPyClient):
             print("now norm of vector is: ", norm)
 
         # log privacy loss
-        eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, config['task_id'])
+        eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, task_id)
         self.num_submissions += eps
         
         # submit data to janus
