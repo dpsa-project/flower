@@ -24,10 +24,18 @@ class DPSANumPyClient(NumPyClient):
     for more information: https://github.com/dpsa-project/overview
 
     NOTE: This is intended for use with the DPSAServer flower server.
+
+    Attributes
+    ----------
+    privacy_spent: float
+        Zero-concentrated Differential Privacy of this client's data
+        spent since DPSANumPyClient object construction. Accumulates over
+        training rounds.
     """
 
     def __init__(
         self,
+        min_privacy_per_round: float,
         aggregator1_location: str,
         aggregator2_location: str,
         client: NumPyClient
@@ -35,6 +43,10 @@ class DPSANumPyClient(NumPyClient):
         """
         Parameters
         ----------
+        min_privacy_per_round: float
+            The minimal zero-contentrated differential privacy required for a single
+            round of training. If the selected server offers a weaker guarantee, no
+            data will be submitted and an exception will be raised.
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9991"
@@ -45,6 +57,7 @@ class DPSANumPyClient(NumPyClient):
             The NumPyClient used for executing the local learning tasks.
         """
         super().__init__()
+        self.min_privacy_per_round = min_privacy_per_round
         self.client = client
         self.dpsa4fl_client_state = client_api_new_state(
             aggregator1_location,
@@ -220,33 +233,28 @@ class DPSANumPyClient(NumPyClient):
             norm = np.linalg.norm(flat_grad_vector)
             print("now norm of vector is: ", norm)
 
-        # log privacy loss
+        # get server privacy parameter
         eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, task_id)
-        self.privacy_spent += eps
         
-        # submit data to janus
-        client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
+        if eps < self.min_privacy_per_round:
+            raise Exception("DPSAClient requested at least " + str(self.min_privacy_per_round) + " privacy but server supplied only " + str(eps))
+        else:
+            # log privacy loss
+            self.privacy_spent += eps
 
-        # return empty, parameter update needs to be retrieved from janus
-        return [], i, d
+            # submit data to janus
+            client_api_submit(self.dpsa4fl_client_state, task_id, flat_grad_vector)
+
+            # return empty, parameter update needs to be retrieved from janus
+            return [], i, d
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
-        parameters = self.reshape_parameters(parameters)
-        return self.client.evaluate(parameters, config)
-
-    def privacy_spent(self) -> float:
         """
-        Return the privacy budget spent since the construction of this
-        object. The result is the zero-concentrated differential privacy
-        bound for the local client data.
-
-        Returns
-        -------
-        privacy: float
-            Zero-concentrated Differential Privacy of this client's data
-            spent since DPSANumPyClient object construction.
+        Evaluation is a privacy-relevant operation on the client dataset. Therefore,
+        this function always reports infinite loss and zero accuracy to the server.
+        Evaluation of the learning process can be done locally client-side, using the
+        evaluation function of the wrapped client.
         """
-        return self.privacy_spent
-
+        return float('inf'), 0, {"accuracy": 0}
