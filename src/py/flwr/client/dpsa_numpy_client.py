@@ -35,7 +35,7 @@ class DPSANumPyClient(NumPyClient):
 
     def __init__(
         self,
-        min_privacy_per_round: float,
+        max_privacy_per_round: float,
         aggregator1_location: str,
         aggregator2_location: str,
         client: NumPyClient
@@ -43,10 +43,10 @@ class DPSANumPyClient(NumPyClient):
         """
         Parameters
         ----------
-        min_privacy_per_round: float
-            The minimal zero-contentrated differential privacy required for a single
-            round of training. If the selected server offers a weaker guarantee, no
-            data will be submitted and an exception will be raised.
+        max_privacy_per_round: float
+            The maximal zero-contentrated differential privacy budget allowed to
+            be spent on a single round of training. If the selected server offers
+            a weaker guarantee, no data will be submitted and an exception will be raised.
         aggregator1_location: str
             Location of the first aggregator server in URL format including the port.
             For example, for a server running locally: "http://127.0.0.1:9991"
@@ -236,7 +236,7 @@ class DPSANumPyClient(NumPyClient):
         # get server privacy parameter
         eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, task_id)
         
-        if eps < self.min_privacy_per_round:
+        if eps > self.min_privacy_per_round:
             raise Exception("DPSAClient requested at least " + str(self.min_privacy_per_round) + " privacy but server supplied only " + str(eps))
         else:
             # log privacy loss
