@@ -57,7 +57,7 @@ class DPSANumPyClient(NumPyClient):
             The NumPyClient used for executing the local learning tasks.
         """
         super().__init__()
-        self.min_privacy_per_round = min_privacy_per_round
+        self.max_privacy_per_round = max_privacy_per_round
         self.client = client
         self.dpsa4fl_client_state = client_api_new_state(
             aggregator1_location,
@@ -236,8 +236,8 @@ class DPSANumPyClient(NumPyClient):
         # get server privacy parameter
         eps = client_api_get_privacy_parameter(self.dpsa4fl_client_state, task_id)
         
-        if eps > self.min_privacy_per_round:
-            raise Exception("DPSAClient requested at least " + str(self.min_privacy_per_round) + " privacy but server supplied only " + str(eps))
+        if eps > self.max_privacy_per_round:
+            raise Exception("DPSAClient requested at least " + str(self.max_privacy_per_round) + " privacy but server supplied only " + str(eps))
         else:
             # log privacy loss
             self.privacy_spent += eps
